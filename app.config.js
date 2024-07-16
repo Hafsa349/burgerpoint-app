@@ -6,7 +6,7 @@ export default {
     slug: 'burgerpoint-loyalty',
     privacy: 'public',
     platforms: ['ios', 'android'],
-    version: '0.15.0',
+    version: '0.0.1',
     orientation: 'portrait',
     icon: './assets/icon.png',
     splash: {
