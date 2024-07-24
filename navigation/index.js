@@ -1,2 +1,3 @@
+import { AppStack } from './AppStack';
 import { AuthStack } from './AuthStack';
-export { AuthStack };
+export { AppStack, AuthStack };
