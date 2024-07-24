@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native'; // Assuming you're using React Native
-import { Logo, Icon } from '../components';
+import { Logo } from './Logo';
+import { Icon } from './Icon';
 import { Images, Colors } from '../config';
 
 export const HeaderComponent = ({ navigation, title, navigationTo }) => {
