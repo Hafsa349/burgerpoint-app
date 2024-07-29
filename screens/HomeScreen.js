@@ -1,14 +1,14 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Image, Dimensions, Animated, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Colors, auth } from '../config';
-import { Icon, HeaderComponent, LoginComponent, Button } from '../components';
-import QRCode from 'react-native-qrcode-svg';
+import { HeaderComponent, LoginComponent, Button } from '../components';
 import { onAuthStateChanged } from 'firebase/auth';
 import { AuthenticatedUserContext } from '../providers';
-import { fetchUserDetails, getBanners, getWhatsNew } from '../services';
+import { fetchUserDetails, getBanners, getOffers, getWhatsNew } from '../services';
 
 const screenWidth = Dimensions.get('window').width;
 const ITEM_WIDTH = screenWidth * 0.9; // Take 80% of the screen width for the item
+const ITEM_WIDTH_OFFERS = screenWidth * 0.43; // Take 80% of the screen width for the item
 const ITEM_HEIGHT = 300;
 const OVERLAP_RATIO = 0.01; // Adjust overlap ratio as needed
 
@@ -31,7 +31,7 @@ export const HomeScreen = ({ navigation }) => {
         const bannerData = await getBanners();
         setBanners(bannerData.sort((a, b) => a.sort - b.sort));
 
-        const whatsNewData = await getWhatsNew();
+        const whatsNewData = await getOffers();
         setWhatsNew(whatsNewData);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -99,23 +99,6 @@ export const HomeScreen = ({ navigation }) => {
     navigation.navigate('DetailScreen', { item, title });
   };
 
-  const getCustomerCard = (user) => {
-    return (
-      <View style={styles.qrSection}>
-        <View style={styles.qrCodeContainer}>
-          <QRCode value={String(user.memberNumber)} size={135} />
-        </View>
-        <View style={styles.pointsBalanceContainer}>
-          <Text style={styles.customerName}>{user.firstName} {user.lastName}</Text>
-          <Text style={styles.titleText}>Member Number</Text>
-          <Text style={styles.pointBalance}>{user.memberNumber}</Text>
-          <Text style={styles.titleText}>Store Points</Text>
-          <Text style={styles.pointBalance}>{user.pointBalance ? user.pointBalance.toLocaleString() : 0}</Text>
-        </View>
-      </View>
-    );
-  };
-
   return (
     <>
       <HeaderComponent navigation={navigation} />
@@ -170,6 +153,32 @@ export const HomeScreen = ({ navigation }) => {
               <Text style={styles.buttonText}>{'Order now'}</Text>
             </Button>
           </View>
+
+          <View style={styles.bannerContainer}>
+            <Text style={styles.title}>Store Offers</Text>
+            <Animated.FlatList
+              horizontal
+              data={whatsNew}
+              keyExtractor={(item) => item.uid}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => handleImagePress(item,"Offers")}>
+                  <View style={[styles.offersFeaturedImageContainer, styles.imageSpacing]}>
+                    <Image
+                      source={{ uri: item.imageUrl }}
+                      style={styles.offersFeaturedImage}
+                    />
+                  </View>
+                </TouchableOpacity>
+              )}
+              showsHorizontalScrollIndicator={false}
+              pagingEnabled
+              snapToInterval={ITEM_WIDTH + screenWidth * OVERLAP_RATIO} // Adjusted snap interval
+              decelerationRate="fast"
+              onScroll={handleWhatsNewScroll} // Update to use handleWhatsNewScroll
+              scrollEventThrottle={16}
+              ref={whatsNewScrollViewRef}
+            />
+          </View>
         </View>
       </ScrollView>
     </>
@@ -177,13 +186,18 @@ export const HomeScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  bannerContainer: {
+    marginLeft: 20,
+    marginTop: 24
+
+  },
   container: {
     flex: 1,
     zIndex: -1,
     backgroundColor: Colors.white,
   },
   featuredContainer: {
-    marginTop: 24,
+    marginTop: 20,
     marginLeft: 0,
     marginRight: 0,
   },
@@ -194,8 +208,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: '100%',
-    marginTop: 20,
-    marginLeft: 20,
+    marginTop: 24,
+    marginLeft: 18,
   },
   button: {
     justifyContent: 'center',
@@ -208,14 +222,14 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 20,
     color: Colors.darkGrey,
-    fontWeight: '500'
+    fontWeight: '700'
   },
   title: {
-    fontSize: 24,
-    marginTop: 6,
-    marginBottom: 10,
-    marginLeft: 8,
+    fontSize: 22,
+    marginBottom: 4,
     fontWeight: '600',
+    alignItems: 'center',
+
   },
   dotsContainer: {
     flexDirection: 'row',
@@ -261,14 +275,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     paddingTop: 12,
   },
-  pointBalance: {
-    fontWeight: 'bold',
-    marginBottom: 5,
-    color: Colors.darkGrey,
-    fontSize: 16,
-    marginTop: 5,
-    borderRadius: 16,
-  },
   featuredImageContainer: {
     width: ITEM_WIDTH, // Take 80% of the screen width for the item
     height: 200,
@@ -281,7 +287,19 @@ const styles = StyleSheet.create({
   },
   featuredImage: {
     flex: 1,
-    opacity: 0.8,
+    opacity: 0.9,
+    resizeMode: 'cover',
+  },
+  offersFeaturedImageContainer: {
+    width: ITEM_WIDTH_OFFERS, // Take 80% of the screen width for the item
+    height: 200,
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginLeft: 2, // Add spacing between images
+  },
+  offersFeaturedImage: {
+    flex: 1,
+    opacity: 0.9,
     resizeMode: 'cover',
   },
 });
