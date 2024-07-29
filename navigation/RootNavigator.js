@@ -1,12 +1,12 @@
 import React from 'react';
-import { AuthStack } from '../navigation';
 import { NavigationContainer } from '@react-navigation/native';
+import { TabNavigator } from './TabNavigator';
 
 
 export const RootNavigator = () => {
   return (
     <NavigationContainer>
-      <AuthStack />
+      <TabNavigator />
     </NavigationContainer>
   );
 };
